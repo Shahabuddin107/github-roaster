@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Dev Roaster & Analyzer</title>
+  <!-- Screenshot generator library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #090d16;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #34d399, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+    }
+    .input-box {
+      display: flex;
+      gap: 0.6rem;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 1.5rem;
+    }
+    input {
+      flex: 1;
+      padding: 0.85rem 1.1rem;
+      border-radius: 12px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      color: #ffffff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      border-color: #06b6d4;
+    }
+    button.primary-btn {
+      padding: 0.85rem 1.5rem;
+      background: linear-gradient(90deg, #06b6d4, #10b981);
+      color: #ffffff;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    button.primary-btn:hover {
+      opacity: 0.9;
+    }
+    button.primary-btn:active {
+      transform: scale(0.97);
+    }
+    #loader {
+      color: #38bdf8;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      font-weight: 600;
+    }
+    .card {
+      display: none;
+      width: 100%;
+      max-width: 520px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+    .card.shake {
+      animation: shakeEffect 0.4s ease-in-out;
+    }
+    @keyframes shakeEffect {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .user-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 1px solid #1f2937;
+      padding-bottom: 1.2rem;
+    }
+    #avatar {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: 2px solid #06b6d4;
+      object-fit: cover;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+      text-align: center;
+    }
+    .stat-item {
+      background: #090d16;
+      padding: 0.75rem;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+    }
+    .stat-item span {
+      display: block;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .stat-item strong {
+      font-size: 1.3rem;
+      color: #38bdf8;
+    }
+    .section-title {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+    .roast-box {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .roast-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #f87171;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .roast-text {
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #fca5a5;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .action-btn {
+      width: 100%;
+      padding: 0.7rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #38bdf8;
+      transition: background 0.2s;
+    }
+    .action-btn:hover {
+      background: #334155;
+    }
+    .action-btn.download {
+      border-color: #059669;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .action-btn.download:hover {
+      background: rgba(16, 185, 129, 0.2);
+    }
+    .repo-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .repo-list li {
+      background: #090d16;
+      border: 1px solid #1f2937;
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .repo-list a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .repo-list a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>GitHub Dev Roaster 🔥</h1>
+    <p>Apna GitHub username daalo aur reality check lo.</p>
+  </header>
+
+  <div class="input-box">
+    <input id="usernameInput" type="text" placeholder="e.g. torvalds, octocat...">
+    <button id="analyzeBtn" class="primary-btn">Roast 🔥</button>
+  </div>
+
+  <div id="loader">GitHub profile scan ho rahi hai... ⏳</div>
+
+  <main id="resultCard" class="card">
+    <!-- User Info -->
+    <div class="user-header">
+      <img id="avatar" src="" alt="Avatar">
+      <div>
+        <h2 id="name" style="font-size: 1.15rem; color: #fff; font-weight: 700;"></h2>
+        <p id="bio" style="font-size: 0.8rem; color: #94a3b8; margin-top: 3px;"></p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-item">
+        <span>Repos</span>
+        <strong id="repoCount">0</strong>
+      </div>
+      <div class="stat-item">
+        <span>Followers</span>
+        <strong id="followerCount" style="color:#34d399;">0</strong>
+      </div>
+      <div class="stat-item">
+        <span>Rating</span>
+        <strong id="devRating" style="color:#fbbf24;">0/10</strong>
+      </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div style="margin-bottom: 1.25rem;">
+      <div class="section-title">Primary Tech Stack</div>
+      <div id="techStack" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+    </div>
+
+    <!-- Roast -->
+    <div class="roast-box">
+      <div class="roast-title">🔥 The Roast</div>
+      <p id="roastText" class="roast-text"></p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="btn-group" id="actionBtnContainer">
+      <button id="copyRoastBtn" class="action-btn">📋 Copy Roast to Clipboard</button>
+      <button id="downloadCardBtn" class="action-btn download">📸 Download Roast Card (PNG)</button>
+    </div>
+
+    <!-- Recent Repos -->
+    <div>
+      <div class="section-title">Recent Active Repositories</div>
+      <ul id="repoList" class="repo-list"></ul>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
